@@ -1,27 +1,11 @@
 #ifndef D_SKIP_LIST_HPP
 #define D_SKIP_LIST_HPP
 
+#include "DSkipNode.hpp"
 #include <iostream>
 #include <vector>
 #include <ctime>
 #include <cstdlib>
-
-/**
- * @brief Doubly Linked Skip List Node
- * 
- */
-class Node {
-    public:
-        int *value;
-        std::vector<Node *> prev;
-        std::vector<Node *> next;
-        Node(int* v, int lvl){
-            value = v;
-            prev = std::vector<Node *>(lvl+1, nullptr);
-            next = std::vector<Node *>(lvl+1, nullptr);
-        }
-        //you don't need down and up with the ability to iterate thru numbers.
-};
 
 /**
  * @brief A Doubly Linked Skip List, which allows for more traversal options and minor 
@@ -34,8 +18,8 @@ class DSkipList
     private:
         int MAX_ALLOWED_LVL;
         int topLevel;
-        Node *head;
-        Node *tail;
+        DSkipNode *head;
+        DSkipNode *tail;
         int getRandomLevel();
 
     public:
@@ -71,16 +55,16 @@ int DSkipList::getRandomLevel(){
 DSkipList::DSkipList(){
     this->MAX_ALLOWED_LVL = 3;
     this->topLevel = 0;
-    this->head = new Node(nullptr, this->topLevel);
-    this->tail = new Node(nullptr, this->topLevel);
+    this->head = new DSkipNode(nullptr, this->topLevel);
+    this->tail = new DSkipNode(nullptr, this->topLevel);
     tail->prev[0] = head;
     head->next[0] = tail;
 }
 
 DSkipList::~DSkipList() {
-    Node *curr = head;
+    DSkipNode *curr = head;
     while (curr != nullptr) {
-        Node *next = curr->next[0];
+        DSkipNode *next = curr->next[0];
         curr->next.clear();
         curr->prev.clear();
         delete curr;
@@ -93,8 +77,8 @@ DSkipList::~DSkipList() {
 DSkipList::DSkipList(int maxLevel){
     this->MAX_ALLOWED_LVL = maxLevel;
     this->topLevel = 0;
-    this->head = new Node(nullptr, this->topLevel);
-    this->tail = new Node(nullptr, this->topLevel);
+    this->head = new DSkipNode(nullptr, this->topLevel);
+    this->tail = new DSkipNode(nullptr, this->topLevel);
     tail->prev[0] = head;
     head->next[0] = tail;
 }
@@ -124,8 +108,8 @@ void DSkipList::insertValueFront(int value){
         this->topLevel = nodeLevel;
     }
     int* persistentVal = new int(value);
-    Node *insertedNode = new Node(persistentVal, nodeLevel);
-    Node *curr = head;
+    DSkipNode *insertedNode = new DSkipNode(persistentVal, nodeLevel);
+    DSkipNode *curr = head;
     while (nodeLevel >= 0) {
         if (curr->next[nodeLevel] != nullptr &&
             curr->next[nodeLevel]->value != nullptr &&
@@ -135,7 +119,7 @@ void DSkipList::insertValueFront(int value){
         }
         else
         {
-            Node *temp = curr->next[nodeLevel];
+            DSkipNode *temp = curr->next[nodeLevel];
             curr->next[nodeLevel] = insertedNode;
             insertedNode->prev[nodeLevel] = curr;
             temp->prev[nodeLevel] = insertedNode;
@@ -157,8 +141,8 @@ void DSkipList::insertValueBack(int value){
         this->topLevel = nodeLevel;
     }
     int* persistentVal = new int(value);
-    Node *insertedNode = new Node(persistentVal, nodeLevel);
-    Node *curr = tail;
+    DSkipNode *insertedNode = new DSkipNode(persistentVal, nodeLevel);
+    DSkipNode *curr = tail;
     while (nodeLevel >= 0) {
         if (curr->prev[nodeLevel] != nullptr &&
             curr->prev[nodeLevel]->value != nullptr &&
@@ -168,7 +152,7 @@ void DSkipList::insertValueBack(int value){
         }
         else
         {
-            Node *temp = curr->prev[nodeLevel];
+            DSkipNode *temp = curr->prev[nodeLevel];
             curr->prev[nodeLevel] = insertedNode;
             insertedNode->next[nodeLevel] = curr;
             temp->next[nodeLevel] = insertedNode;
@@ -185,7 +169,7 @@ std::ostream& operator<<(std::ostream& o, const DSkipList& dSL){
             continue;
         }
         o << "Level " << i << ": " << "head" << " <-> ";
-        Node *curr = dSL.head->next[i];
+        DSkipNode *curr = dSL.head->next[i];
         while (curr != nullptr && curr->value != nullptr) {
             o << *(curr->value);
             if (curr->next[i] != nullptr) {
@@ -206,7 +190,7 @@ void DSkipList::show() const{
             continue;
         }
         std::cout << "Level " << i << ": " << "head" << " <-> ";
-        Node *curr = this->head->next[i];
+        DSkipNode *curr = this->head->next[i];
         while (curr != nullptr && curr->value != nullptr) {
             std::cout << *(curr->value);
             if (curr->next[i] != nullptr) {
@@ -226,7 +210,7 @@ void DSkipList::showBack() const{
             continue;
         }
         std::cout << "Level " << i << ": " << "tail" << " <-> ";
-        Node *curr = this->tail->prev[i];
+        DSkipNode *curr = this->tail->prev[i];
         while (curr != nullptr && curr->value != nullptr) {
             std::cout << *(curr->value);
             if (curr->prev[i] != nullptr) {
@@ -253,7 +237,7 @@ bool DSkipList::search(int num) const{
 
 bool DSkipList::searchFront(int num) const{
     int level = this->topLevel;
-    Node *curr = this->head;
+    DSkipNode *curr = this->head;
     while (level >= 0){
         if(curr->next[level] == nullptr || 
         curr->next[level]->value == nullptr || 
@@ -270,7 +254,7 @@ bool DSkipList::searchFront(int num) const{
 
 bool DSkipList::searchBack(int num) const{
     int level = this->topLevel;
-    Node *curr = this->tail;
+    DSkipNode *curr = this->tail;
     while (level >= 0){
         if(curr->prev[level] == nullptr || 
         curr->prev[level]->value == nullptr || 
@@ -299,8 +283,8 @@ void DSkipList::remove(int num){
 
 void DSkipList::removeHighestFront(int num){
     int level = this->topLevel;
-    Node *curr = this->head;
-    Node *temp = nullptr;
+    DSkipNode *curr = this->head;
+    DSkipNode *temp = nullptr;
     while (level >= 0)
     {
         if(curr->next[level] == nullptr || 
@@ -325,8 +309,8 @@ void DSkipList::removeHighestFront(int num){
 
 void DSkipList::removeHighestBack(int num){
     int level = this->topLevel;
-    Node *curr = this->tail;
-    Node *temp = nullptr;
+    DSkipNode *curr = this->tail;
+    DSkipNode *temp = nullptr;
     while (level >= 0)
     {
         if(curr->prev[level] == nullptr || 
@@ -351,8 +335,8 @@ void DSkipList::removeHighestBack(int num){
 
 void DSkipList::removeFirst(int num){
     int level = this->topLevel;
-    Node *curr = this->head;
-    Node *temp = nullptr;
+    DSkipNode *curr = this->head;
+    DSkipNode *temp = nullptr;
     while (curr->next[0] != nullptr)
     {
         if (*(curr->next[0]->value) == num){
@@ -375,8 +359,8 @@ void DSkipList::removeFirst(int num){
 
 void DSkipList::removeLast(int num){
     int level = this->topLevel;
-    Node *curr = this->tail;
-    Node *temp = nullptr;
+    DSkipNode *curr = this->tail;
+    DSkipNode *temp = nullptr;
     while (curr->prev[0] != nullptr)
     {
         if (*(curr->prev[0]->value) == num){

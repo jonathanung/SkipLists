@@ -1,24 +1,11 @@
 #ifndef SKIP_LIST_HPP
 #define SKIP_LIST_HPP
 
+#include "SkipNode.hpp"
 #include <iostream>
 #include <vector>
 #include <ctime>
 #include <cstdlib>
-
-/**
- * @brief Skip List Node
- * 
- */
-class Node {
-    public:
-        int *value;
-        std::vector<Node *> next;
-        Node(int* v, int lvl){
-            value = v;
-            next = std::vector<Node *>(lvl+1, nullptr);
-        }
-};
 
 /**
  * @brief A Skip List class.
@@ -30,7 +17,7 @@ class SkipList
     private:
         int MAX_ALLOWED_LVL;
         int topLevel;
-        Node *head;
+        SkipNode *head;
         int getRandomLevel();
 
     public:
@@ -59,19 +46,19 @@ int SkipList::getRandomLevel(){
 SkipList::SkipList(){
     this->MAX_ALLOWED_LVL = 3;
     this->topLevel = 0;
-    this->head = new Node(nullptr, this->topLevel);
+    this->head = new SkipNode(nullptr, this->topLevel);
 }
 
 SkipList::SkipList(int maxLevel){
     this->MAX_ALLOWED_LVL = maxLevel;
     this->topLevel = 0;
-    this->head = new Node(nullptr, this->topLevel);
+    this->head = new SkipNode(nullptr, this->topLevel);
 }
 
 SkipList::~SkipList() {
-    Node *curr = head;
+    SkipNode *curr = head;
     while (curr != nullptr) {
-        Node *next = curr->next[0];
+        SkipNode *next = curr->next[0];
         curr->next.clear();
         delete curr;
         curr = next;
@@ -87,8 +74,8 @@ void SkipList::insertValue(int value){
         this->topLevel = nodeLevel;
     }
     int* persistentVal = new int(value);
-    Node *insertedNode = new Node(persistentVal, nodeLevel);
-    Node *curr = head;
+    SkipNode *insertedNode = new SkipNode(persistentVal, nodeLevel);
+    SkipNode *curr = head;
     while (nodeLevel >= 0) {
         if (curr->next[nodeLevel] != nullptr &&
             curr->next[nodeLevel]->value != nullptr &&
@@ -98,7 +85,7 @@ void SkipList::insertValue(int value){
         }
         else
         {
-            Node *temp = curr->next[nodeLevel];
+            SkipNode *temp = curr->next[nodeLevel];
             curr->next[nodeLevel] = insertedNode;
             insertedNode->next[nodeLevel] = temp;
             nodeLevel--;
@@ -113,7 +100,7 @@ std::ostream& operator<<(std::ostream& o, const SkipList& sL){
             continue;
         }
         o << "Level " << i << ": ";
-        Node *curr = sL.head->next[i];
+        SkipNode *curr = sL.head->next[i];
         while (curr != nullptr && curr->value != nullptr) {
             o << *(curr->value);
             if (curr->next[i] != nullptr) {
@@ -133,7 +120,7 @@ void SkipList::show() const{
             continue;
         }
         std::cout << "Level " << i << ": ";
-        Node *curr = this->head->next[i];
+        SkipNode *curr = this->head->next[i];
         while (curr != nullptr && curr->value != nullptr) {
             std::cout << *(curr->value);
             if (curr->next[i] != nullptr) {
@@ -150,7 +137,7 @@ bool SkipList::search(int num) const{
         return false;
     }
     int level = this->topLevel;
-    Node *curr = this->head;
+    SkipNode *curr = this->head;
     while (level >= 0){
         if(curr->next[level] == nullptr || 
         curr->next[level]->value == nullptr || 
@@ -174,8 +161,8 @@ void SkipList::removeHighest(int num){
         return;
     }
     int level = this->topLevel;
-    Node *curr = this->head;
-    Node *temp = nullptr;
+    SkipNode *curr = this->head;
+    SkipNode *temp = nullptr;
     while (level >= 0)
     {
         if(curr->next[level] == nullptr || 
@@ -226,8 +213,8 @@ void SkipList::removeFirst(int num){
         return;
     }
     int level = this->topLevel;
-    Node *curr = this->head;
-    Node *temp = nullptr;
+    SkipNode *curr = this->head;
+    SkipNode *temp = nullptr;
     while (curr->next[0] != nullptr)
     {
         if (*(curr->next[0]->value) == num){
