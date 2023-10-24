@@ -18,6 +18,9 @@ class DSkipNode {
             prev = std::vector<DSkipNode *>(lvl+1, nullptr);
             next = std::vector<DSkipNode *>(lvl+1, nullptr);
         }
+        ~DSkipNode() {
+            delete value;
+        }
 };
 
 #endif

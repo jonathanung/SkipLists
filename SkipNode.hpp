@@ -16,6 +16,9 @@ class SkipNode {
             value = v;
             next = std::vector<SkipNode *>(lvl+1, nullptr);
         }
+        ~SkipNode() {
+            delete value;
+        }
 };
 
 #endif
